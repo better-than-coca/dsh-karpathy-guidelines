@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "policy": "dsh-plugin-naming/v1",
+  "plugin": {
+    "namespace": "better-than-coca",
+    "name": "karpathy-guidelines",
+    "coordinate": "better-than-coca/karpathy-guidelines",
+    "packageName": "@better-than-coca/dsh-karpathy-guidelines"
+  },
+  "names": {
+    "pluginNames": ["karpathy-guidelines"],
+    "loaderIds": ["karpathy-guidelines"],
+    "services": [],
+    "tools": [],
+    "commands": [],
+    "skills": [],
+    "skillProviders": [],
+    "events": [],
+    "settingsNamespaces": [],
+    "routes": []
+  }
+}

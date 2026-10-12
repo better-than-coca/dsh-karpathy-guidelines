@@ -1,0 +1,36 @@
+# NOTICE
+
+`@better-than-coca/dsh-karpathy-guidelines`
+
+## Redistributed text
+
+`assets/guidelines-full.md` reproduces, with formatting changes only, the body of the
+`karpathy-guidelines` skill from:
+
+- Repository: https://github.com/multica-ai/andrej-karpathy-skills
+- Path: `skills/karpathy-guidelines/SKILL.md`
+
+That repository declares `license: MIT` in the skill's frontmatter and in its package
+metadata. The repository has no root `LICENSE` file, so this redistribution relies on
+that declaration rather than on a root license file. Verify upstream before relying on
+this notice as a legal record.
+
+`assets/guidelines-compact.md` is an original condensation written for this plugin. It
+states the same four principles and drops the upstream anchors, the tradeoff note, and
+the plan template, which remain available through `promptMode: 'full'`.
+
+## Attribution
+
+The four principles are derived from Andrej Karpathy's public observations on LLM coding
+pitfalls. The upstream skill and this plugin both cite that post as the source of the
+ideas; neither claims authorship of the principles themselves.
+
+## Related work, not incorporated
+
+- `T-Auto/dsh-ops` — unrelated plugin, listed only because both were evaluated on the
+  same host.
+- `duolahypercho/andrej-karpathy-skills` — a Codex-native distillation that adds a
+  response-pattern block and a pushback section. Those additions are **not** part of this
+  plugin's text.
+- `nightfun-pixel/dsh-skill-karpathy-guidelines` — a DSH skill directory carrying the
+  upstream body. It is the model-invoked alternative this plugin complements.

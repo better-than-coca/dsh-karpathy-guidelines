@@ -1,0 +1,16 @@
+# Bundle patch for @better-than-coca/dsh-karpathy-guidelines.
+#
+# Installing the package appends its name to `dsh.profile.bundles`; this patch is
+# what actually mounts the plugin and gives it a config row you can edit in the
+# DSH configuration editor. Every key below has a default in lib/config.js, so
+# deleting a line is the same as accepting the default.
+- insert:
+    - id: karpathy-guidelines
+      name: '@better-than-coca/dsh-karpathy-guidelines'
+      config:
+        # One of: "compact" (about 200 tokens per request), "full", "off".
+        promptMode: compact
+        # Add a file header naming the four principles; useful when scanning logs.
+        includeHeader: true
+        # Optional extra rules appended verbatim, for repository-specific additions.
+        # extraGuidance: ''
