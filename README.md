@@ -33,16 +33,22 @@ The launcher sits beside the application binary — the folder that contains the
 | Windows | `<DSH install>\resources\runtime\cli\bin\dsh.cmd` |
 | macOS / Linux | `<DSH install>/resources/runtime/cli/bin/dsh` |
 
-Install from GitHub — no registry account required:
+Install from npm:
+
+```powershell
+& '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add @better-than-coca/dsh-karpathy-guidelines
+```
+
+Or install straight from GitHub — no npm account required, and the right choice when you want a commit that is not in a release yet:
 
 ```powershell
 & '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add github:better-than-coca/dsh-karpathy-guidelines
 ```
 
-Replace `desktop` with the profile you are installing into. That form tracks the default branch, so append a release tag to pin a known revision instead:
+Replace `desktop` with the profile you are installing into. The `github:` form tracks the default branch, so append a release tag to pin a known revision instead:
 
 ```powershell
-& '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add github:better-than-coca/dsh-karpathy-guidelines#v0.1.1
+& '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add github:better-than-coca/dsh-karpathy-guidelines#v0.1.2
 ```
 
 Restart the DSH application afterwards; the loader mounts a new bundle at startup.
@@ -55,7 +61,7 @@ Uninstall removes the dependency and the bundle row, and with it the section:
 & '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop remove @better-than-coca/dsh-karpathy-guidelines
 ```
 
-This package is not published to npm. The `github:` form above is the supported install path.
+Both forms install the same code — `github:` resolves the repository, npm resolves the published tarball. Prefer npm; reach for `github:` when you need a revision that has not been released.
 
 ## Configuration
 

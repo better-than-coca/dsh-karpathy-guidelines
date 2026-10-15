@@ -1,6 +1,6 @@
 {
   "name": "@better-than-coca/dsh-karpathy-guidelines",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Karpathy-style coding discipline for DeepSeek Harness, delivered as a native system-prompt section instead of a Codex-style plugin manifest.",
   "keywords": [
     "deepseek-harness",
@@ -11,6 +11,14 @@
     "system-prompt"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/better-than-coca/dsh-karpathy-guidelines.git"
+  },
+  "homepage": "https://github.com/better-than-coca/dsh-karpathy-guidelines#readme",
+  "bugs": {
+    "url": "https://github.com/better-than-coca/dsh-karpathy-guidelines/issues"
+  },
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -27,6 +35,10 @@
     "NOTICE",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "engines": {
     "node": ">=22"
   },
