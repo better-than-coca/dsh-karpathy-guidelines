@@ -1,71 +1,73 @@
 # @better-than-coca/dsh-karpathy-guidelines
 
-The Karpathy coding discipline for DeepSeek Harness, delivered as a **native system-prompt section**.
+[English](README.en.md) | **中文**
 
-## Why this is not a port of the Codex package
+把 Karpathy 的编码纪律做成 DeepSeek Harness 的**原生 system prompt 段落**。
 
-The original `andrej-karpathy-skills` repository is a Codex-native package: `.codex-plugin/plugin.json`, an `AGENTS.md`, a `skills/<name>/SKILL.md` tree, and a paste-into-Custom-Instructions `instruction.md`. Codex needs that shape because a Codex plugin *is* that shape. DSH is assembled differently, so this plugin uses DSH's own extension point instead of imitating a manifest format the harness never reads:
+## 为什么它不是 Codex 那个包的移植
 
-| What the Codex package uses | What this plugin uses instead |
+上游 `andrej-karpathy-skills` 仓库是 Codex 原生的包：`.codex-plugin/plugin.json`、一份 `AGENTS.md`、一棵 `skills/<name>/SKILL.md` 目录，以及一段让你粘进 Custom Instructions 的 `instruction.md`。Codex 需要这个形状，因为 Codex 插件就是这个形状。DSH 的组装方式不同，所以这个插件改用 DSH 自己的扩展点，而不是去仿造一份 harness 根本不读的 manifest 格式：
+
+| Codex 包用的 | 这个插件改用 |
 |---|---|
-| `.codex-plugin/plugin.json` | `package.json#dsh.bundle.patch` (the DSH loader contract) |
-| `instruction.md` pasted into settings | `ctx.systemPrompt.section()` registered at mount |
-| `AGENTS.md` maintainer file | nothing shipped; the plugin owns its own text |
-| `skills/<name>/SKILL.md` | `assets/*.md` carried in the package, composed per assembly |
-| Hard-coded instruction slot | `getSectionOrder('PLAN_POLICY') - 1` resolved from the host registry |
+| `.codex-plugin/plugin.json` | `package.json#dsh.bundle.patch`（DSH loader 的契约） |
+| `instruction.md` 粘进设置 | 挂载时注册 `ctx.systemPrompt.section()` |
+| `AGENTS.md` 维护者文件 | 不发；插件自己持有文本 |
+| `skills/<name>/SKILL.md` | 打进包里的 `assets/*.md`，按组装方式组合 |
+| 写死的指令槽位 | 从宿主注册表解析出的 `getSectionOrder('PLAN_POLICY') - 1` |
 
-The behavioural difference that matters: a skill is **model-invoked** — the catalog exposes only its name and `description`, and the body arrives only if the model decides to call the `skill` tool. A prompt section is **always in the request**. This plugin exists because the SKILL.md-only route silently does nothing on the sessions that needed it.
+真正要紧的行为差异：skill 是**模型触发**的——技能目录只暴露 name 和 description，正文要等模型决定调用 `skill` 工具时才会到达。prompt 段落则是**每次请求都在**。这个插件存在的原因就是：只给 SKILL.md 的那条路，在真正需要它的会话里会静默失效。
 
-## Requirements
+## 环境要求
 
-- A DSH host whose loader reads `package.json#dsh.bundle.patch` (the desktop app does; so do the `web` and `headless` profiles).
-- Node.js 22 or newer.
-- Nothing else. There is no build step and no runtime dependency, and `lib/` is committed, so a source install works as-is.
+- 宿主的 DSH loader 要会读 `package.json#dsh.bundle.patch`（桌面端会读，`web` 和 `headless` profile 也会读）。
+- Node.js 22 或更新。
+- 别的都不需要。没有构建步骤，没有运行时依赖，`lib/` 是提交进仓库的，所以直接源码安装就能用。
 
-## Install
+## 安装
 
-Use the `dsh` launcher that ships **with your DSH installation**. The launcher on `PATH` cannot manage the reserved `desktop` profile, which is the one the desktop app runs.
+用**跟着你 DSH 安装目录一起发出来的**那个 `dsh` 启动器。PATH 上那个启动器管不了保留的 `desktop` profile，而桌面端跑的正是它。
 
-The launcher sits beside the application binary — the folder that contains the executable (`DeepSeek Harness.exe` on Windows) is `<DSH install>` here:
+启动器就在应用程序二进制文件旁边——含可执行文件（Windows 上是 `DeepSeek Harness.exe`）的那个文件夹，下文记作 `<DSH install>`：
 
-| Platform | Launcher |
+| 平台 | 启动器 |
 |---|---|
 | Windows | `<DSH install>\resources\runtime\cli\bin\dsh.cmd` |
 | macOS / Linux | `<DSH install>/resources/runtime/cli/bin/dsh` |
 
-Install from npm:
+从 npm 安装：
 
 ```powershell
 & '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add @better-than-coca/dsh-karpathy-guidelines
 ```
 
-Or install straight from GitHub — no npm account required, and the right choice when you want a commit that is not in a release yet:
+或者直接从 GitHub 装——不需要 npm 账号，适合你想装一个还没进 release 的 commit：
 
 ```powershell
 & '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add github:better-than-coca/dsh-karpathy-guidelines
 ```
 
-Replace `desktop` with the profile you are installing into. The `github:` form tracks the default branch, so append a release tag to pin a known revision instead:
+把 `desktop` 换成你要装进去的那个 profile。`github:` 形式跟的是默认分支，所以想锁到一个确定的版本，就在后面缀上 release tag：
 
 ```powershell
 & '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add github:better-than-coca/dsh-karpathy-guidelines#v0.1.3
 ```
 
-Restart the DSH application afterwards; the loader mounts a new bundle at startup.
+装完重启 DSH 应用；新的 bundle 在启动时挂载。
 
-**Confirm it is active.** Open a session and look at the start of the system prompt for a section beginning `# Karpathy coding guidelines`. Seeing the `karpathy-guidelines` row in `--dump-config` only proves the bundle was mounted, not that the section registered — the prompt text is the check that matters.
+**确认它真的生效。** 开一个会话，看 system prompt 开头有没有一段以 `# Karpathy coding guidelines` 起头。在 `--dump-config` 里看到 `karpathy-guidelines` 这一行，只能证明 bundle 挂上了，不能证明段落注册成功——真正算数的是 prompt 里的那段文本。
 
-Uninstall removes the dependency and the bundle row, and with it the section:
+卸载会移掉这个依赖和 bundle 行，段落随之消失：
 
 ```powershell
 & '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop remove @better-than-coca/dsh-karpathy-guidelines
 ```
 
-Both forms install the same code — `github:` resolves the repository, npm resolves the published tarball. Prefer npm; reach for `github:` when you need a revision that has not been released.
+两种装法装到的是同一份代码——`github:` 去解析仓库，npm 去解析已发布的 tarball。优先用 npm；需要未发布的版本时再用 `github:`。
 
-## Configuration
+## 配置
 
-Edit the `karpathy-guidelines` row in the DSH configuration editor, or the `config:` block this bundle's patch contributes:
+在 DSH 的配置编辑器里改 `karpathy-guidelines` 这一行，或者改这个 bundle 的 patch 贡献出来的 `config:` 块：
 
 ```yaml
 - insert:
@@ -77,71 +79,71 @@ Edit the `karpathy-guidelines` row in the DSH configuration editor, or the `conf
         extraGuidance: ''
 ```
 
-| Key | Values | Default | Effect |
+| 键 | 取值 | 默认 | 作用 |
 |---|---|---|---|
-| `promptMode` | `compact` \| `full` \| `off` | `compact` | `compact` is the four principles rewritten to fit a standing block; `full` is the upstream text verbatim; `off` publishes nothing |
-| `includeHeader` | boolean | `true` | Prepend one paragraph naming the plugin and stating that repository instructions win |
-| `extraGuidance` | string | `''` | Appended verbatim under its own heading, for deployment-specific additions |
+| `promptMode` | `compact` \| `full` \| `off` | `compact` | `compact` 是把四条准则改写成一枚常驻段落的篇幅；`full` 是上游原文；`off` 什么都不发 |
+| `includeHeader` | boolean | `true` | 在前面加一段，写明插件名并声明仓库指令优先 |
+| `extraGuidance` | string | `''` | 原样追加在它自己的一级标题下，用于部署侧的补充 |
 
-An unknown key is a **mount-time error**, not a silent no-op: the plugin names the offending key and the accepted ones. Validation lives in [`lib/config.js`](lib/config.js).
+未知的键是**挂载时报错**，不是静默忽略：插件会点名那个非法的键和可接受的键。校验代码在 [`lib/config.js`](lib/config.js)。
 
-## Model Experience
+## 模型侧看到什么
 
-### Request Surface and Activation Conditions
+### 请求面与激活条件
 
-#### What the Model Sees
+#### 模型看到的东西
 
-One system-prompt section, `better-than-coca:karpathy-guidelines`, ordered one slot before the harness's plan policy. Its text is a provider function, so the body is composed from the frozen configuration at each prompt assembly. With the defaults, the section text is exactly `lib/text.js#composeSectionText({ promptMode: 'compact', includeHeader: true, extraGuidance: '' })`.
+一个 system prompt 段落，名为 `better-than-coca:karpathy-guidelines`，排在 harness 的 plan policy 前一个槽位。它的文本是个 provider 函数，所以每次组装 prompt 时，正文都是从冻结的那份配置现算出来的。默认配置下，段落文本就等于 `lib/text.js#composeSectionText({ promptMode: 'compact', includeHeader: true, extraGuidance: '' })`。
 
-`promptMode: 'full'` substitutes the upstream body from `assets/guidelines-full.md`; `promptMode: 'off'` makes the provider return an empty string, which contributes nothing.
+`promptMode: 'full'` 会换成 `assets/guidelines-full.md` 里的上游正文；`promptMode: 'off'` 让 provider 返回空字符串，等于不贡献任何内容。
 
-#### Token Impact
+#### Token 开销
 
-Measured on the shipped assets: header + compact body is about 1.4k characters, roughly 300 tokens per request; `full` is about 2.4k characters. The cost is fixed for the life of the mount and does not grow with session length.
+按随包发布的资源实测：header + compact 正文约 1.4k 字符，折合每次请求约 300 token；`full` 约 2.4k 字符。这个开销在挂载期间恒定，不随会话变长而增长。
 
-#### KV Cache Impact
+#### 对 KV cache 的影响
 
-The section is position-stable and its text is derived from one immutable configuration snapshot, so it contributes a stable prompt prefix and does not invalidate cache reuse between turns. Two things replace it: editing the configuration row (the plugin re-mounts and the body changes), and a host upgrade that changes the surrounding section order. Both are operator actions, not per-turn drift.
+段落位置固定，文本来自同一份不可变配置快照，所以它贡献的是一段稳定的 prompt 前缀，不会把轮次之间的 cache 复用打散。会打破它的是另外两件事：改配置行（插件重挂载，正文变了），以及宿主升级改变了周边的段落顺序。两者都是运维动作，不是逐轮漂移。
 
-## How it works
+## 工作原理
 
-1. The loader mounts the plugin from the bundle patch with its config row.
-2. `lib/config.js` validates the row once and freezes the result; unknown keys fail the mount.
-3. `lib/index.js` resolves its order from `ctx.systemPrompt.getSectionOrder('PLAN_POLICY') - 1` and registers one section inside `ctx.effect(...)`.
-4. Each prompt assembly calls the section's `text` provider, which composes header + body + optional extra guidance from `assets/`.
-5. Unloading the plugin disposes the effect and the section disappears from the prompt.
+1. loader 按 bundle patch 和它的 config 行挂载插件。
+2. `lib/config.js` 校验一次并冻结结果；未知的键直接让挂载失败。
+3. `lib/index.js` 从 `ctx.systemPrompt.getSectionOrder('PLAN_POLICY') - 1` 解析出自己的顺序，在 `ctx.effect(...)` 里注册一个段落。
+4. 每次组装 prompt 时调用段落的 `text` provider，它从 `assets/` 组合出 header + 正文 + 可选的附加指引。
+5. 卸载插件会释放 effect，段落从 prompt 里消失。
 
-There is no tool, no event listener, no session state, and no network access.
+没有工具、没有事件监听、没有会话状态、不访问网络。
 
-## Known Limitations and Deferred Work
+## 已知限制与暂缓的工作
 
-- **No per-turn relevance gate** — the section is in every request, including sessions with no code in them. `promptMode: 'off'` is manual; a hook plugin keyed on the turn's intent could gate it automatically, and that is deliberately not built yet.
-- **No mandatory concluding procedure** — the four principles shape how work is done, not how it is reported. The `full` text keeps the upstream `step -> verify` plan template; there is no enforced response header such as `Assumption / Changed / Verified`, because the harness already owns its own response conventions.
-- **Provenance** — the `full` body is the upstream SKILL.md text, redistributed under the MIT declaration in that repository's frontmatter. See [`NOTICE`](NOTICE).
-- **Live-session rendering** — observed in a real desktop-app request on 2026-10-15 (DSH desktop app, `desktop` profile, `promptMode: compact`): the composed section reached the model's system prompt verbatim. The packaged artifact is also mounted and composed through the loader in an isolated profile, and the section contract is unit-tested. What tests do not cover is a third-party host whose section order differs from the one this was developed against.
+- **没有逐轮的相关性闸门**——段落进每一次请求，包括完全不含代码的会话。切 `off` 要手动；一个按当轮意图判断的 hook 插件本可以自动做这件事，这里是刻意还没写。
+- **没有强制的收尾流程**——四条准则塑造的是怎么做，不是怎么汇报。`full` 文本保留了上游的 `step -> verify` 计划模板；这里没有强制的响应头（比如 `Assumption / Changed / Verified`），因为 harness 本身已经有自己的响应约定。
+- **再分发的来源**——`full` 正文是上游 SKILL.md 的文本，按那个仓库 frontmatter 里的 MIT 声明再分发。见 [`NOTICE`](NOTICE)。
+- **真实会话里的渲染**——2026-10-15 在一次真实桌面端请求里观测到（DSH 桌面端、`desktop` profile、`promptMode: compact`）：组合出的段落原样进了模型的 system prompt。打包产物另在一个隔离 profile 里经 loader 挂载并组合，段落契约也有单元测试。测试没覆盖的是第三方宿主——它的段落顺序可能和开发时的这个不一样。
 
-## Tests
+## 测试
 
 ```powershell
 cd <checkout>
 node --test 'test/*.test.mjs'
 ```
 
-Seventeen cases cover configuration defaults and rejection paths, the section registration contract (one section, derived order, disposer on unload, fallback when the registry is absent), and the composed text for every mode.
+17 个用例，覆盖配置默认值与拒绝路径、段落注册契约（只有一个段落、顺序是推导来的、卸载时释放、注册表缺失时的回退），以及每种模式组合出来的文本。
 
-## Releasing
+## 发布
 
-Releases are tag-driven. Bump `version` in `package.json`, commit, then push a tag carrying the same number:
+发布由 tag 驱动。改 `package.json` 里的 `version`、提交，然后推一个同号的 tag：
 
 ```bash
 git tag v0.1.3
 git push origin v0.1.3
 ```
 
-The `Publish Package` workflow checks that the tag matches `package.json`, runs the test suite, and publishes to npm. It authenticates with [OIDC trusted publishing](https://docs.npmjs.com/trusted-publishers), so there is no npm token in this repository and none in CI secrets — npm exchanges the workflow's short-lived identity token for a publish credential scoped to that single run, and generates provenance attestations automatically.
+`Publish Package` workflow 会先核对 tag 与 `package.json` 是否一致，跑测试套件，然后发布到 npm。它用 [OIDC trusted publishing](https://docs.npmjs.com/trusted-publishers) 认证，所以这个仓库里没有 npm token，CI secrets 里也没有——npm 拿 workflow 的短期身份令牌换一份只对那一次运行有效的发布凭据，并自动生成 provenance 证明。
 
-The workflow can also be started by hand from the Actions tab when a tag push needs a re-run.
+需要重跑一次 tag push 时，也可以从 Actions 页手动触发。
 
-## License
+## 许可
 
-MIT. The redistributed guideline text carries its own upstream MIT declaration; see [`NOTICE`](NOTICE).
+MIT。再分发的那份准则文本带着它自己的上游 MIT 声明；见 [`NOTICE`](NOTICE)。
