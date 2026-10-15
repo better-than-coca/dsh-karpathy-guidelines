@@ -7,15 +7,18 @@ import { SECTION_HEADER, SECTION_NAME, bodyLength, composeSectionText } from '..
 /**
  * Build the smallest context that satisfies the plugin's declared services,
  * capturing every registration so a test can assert on the real call.
+ *
+ * The stub deliberately carries no `config` property: the real Cordis context
+ * has none, and the plugin row's configuration arrives as `apply`'s second
+ * argument. A stub `ctx.config` would hide a regression to `resolveConfig(ctx.config)`.
  * @param {Record<string, unknown>} [config] - configuration passed to `apply`.
- * @returns {{ctx: object, sections: object[], disposers: Function[], logs: unknown[][]}} captured harness doubles.
+ * @returns {{ctx: object, config: Record<string, unknown>|undefined, sections: object[], disposers: Function[], logs: unknown[][]}} captured harness doubles.
  */
 function harness(config) {
   const sections = []
   const disposers = []
   const logs = []
   const ctx = {
-    config,
     systemPrompt: {
       getSectionOrder: (slot) => (slot === 'PLAN_POLICY' ? 500 : 0),
       section: (section) => {
@@ -31,13 +34,13 @@ function harness(config) {
       info: (...args) => logs.push(args),
     },
   }
-  return { ctx, sections, disposers, logs }
+  return { ctx, config, sections, disposers, logs }
 }
 
 test('apply registers exactly one section on the harness prompt service', async () => {
   const { apply, inject, name } = await import('../lib/index.js')
   const h = harness()
-  apply(h.ctx)
+  apply(h.ctx, h.config)
 
   assert.equal(name, 'karpathy-guidelines')
   assert.deepEqual(inject, ['systemPrompt'])
@@ -46,10 +49,23 @@ test('apply registers exactly one section on the harness prompt service', async 
   assert.equal(h.sections[0].order, 499)
 })
 
+test('configuration comes from the second apply argument, never from the context', async () => {
+  // The real harness resolves `ctx.config` as an injected service and throws
+  // for it (the 2026-10-12 silent-failure bug). Any stray `config` on the
+  // context must lose to the argument the loader passes.
+  const { apply } = await import('../lib/index.js')
+  const h = harness({ promptMode: 'full' })
+  h.ctx.config = { promptMode: 'off' }
+  apply(h.ctx, h.config)
+
+  assert.equal(h.sections.length, 1)
+  assert.equal(h.sections[0].text(), composeSectionText(resolveConfig({ promptMode: 'full' })))
+})
+
 test('the section text is a provider, so configuration is read per assembly', async () => {
   const { apply } = await import('../lib/index.js')
   const h = harness({ promptMode: 'compact' })
-  apply(h.ctx)
+  apply(h.ctx, h.config)
 
   assert.equal(typeof h.sections[0].text, 'function')
   assert.equal(h.sections[0].text(), composeSectionText(resolveConfig({ promptMode: 'compact' })))
@@ -59,7 +75,7 @@ test('a host without the named registry still mounts at the fallback order', asy
   const { apply } = await import('../lib/index.js')
   const h = harness()
   delete h.ctx.systemPrompt.getSectionOrder
-  apply(h.ctx)
+  apply(h.ctx, h.config)
   assert.equal(h.sections[0].order, 499)
 
   const throwing = harness()
@@ -78,7 +94,7 @@ test('a host without the named registry still mounts at the fallback order', asy
 test('mounting logs the effective mode once', async () => {
   const { apply } = await import('../lib/index.js')
   const h = harness({ promptMode: 'full' })
-  apply(h.ctx)
+  apply(h.ctx, h.config)
   assert.equal(h.logs.length, 1)
   assert.match(String(h.logs[0][0]), /prompt mode/)
   assert.equal(h.logs[0][1], 'full')
@@ -119,7 +135,6 @@ test('unmounting removes the section through the effect disposer', async () => {
   const sections = []
   const disposed = []
   const ctx = {
-    config: {},
     systemPrompt: {
       getSectionOrder: () => 500,
       section: (section) => {
