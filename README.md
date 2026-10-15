@@ -16,19 +16,46 @@ The original `andrej-karpathy-skills` repository is a Codex-native package: `.co
 
 The behavioural difference that matters: a skill is **model-invoked** — the catalog exposes only its name and `description`, and the body arrives only if the model decides to call the `skill` tool. A prompt section is **always in the request**. This plugin exists because the SKILL.md-only route silently does nothing on the sessions that needed it.
 
+## Requirements
+
+- A DSH host whose loader reads `package.json#dsh.bundle.patch` (the desktop app does; so do the `web` and `headless` profiles).
+- Node.js 22 or newer.
+- Nothing else. There is no build step and no runtime dependency, and `lib/` is committed, so a source install works as-is.
+
 ## Install
 
+Use the `dsh` launcher that ships **with your DSH installation**. The launcher on `PATH` cannot manage the reserved `desktop` profile, which is the one the desktop app runs.
+
+The launcher sits beside the application binary — the folder that contains the executable (`DeepSeek Harness.exe` on Windows) is `<DSH install>` here:
+
+| Platform | Launcher |
+|---|---|
+| Windows | `<DSH install>\resources\runtime\cli\bin\dsh.cmd` |
+| macOS / Linux | `<DSH install>/resources/runtime/cli/bin/dsh` |
+
+Install from GitHub — no registry account required:
+
 ```powershell
-& 'D:\dsh-d\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add @better-than-coca/dsh-karpathy-guidelines
+& '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add github:better-than-coca/dsh-karpathy-guidelines
 ```
 
-Replace the CLI path with the desktop application's own launcher, and `desktop` with the target profile. The regular `dsh` on `PATH` cannot manage the reserved `desktop` profile. Restart the desktop application after installing; the loader mounts a new bundle at startup.
+Replace `desktop` with the profile you are installing into. That form tracks the default branch, so append a release tag to pin a known revision instead:
+
+```powershell
+& '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add github:better-than-coca/dsh-karpathy-guidelines#v0.1.1
+```
+
+Restart the DSH application afterwards; the loader mounts a new bundle at startup.
+
+**Confirm it is active.** Open a session and look at the start of the system prompt for a section beginning `# Karpathy coding guidelines`. Seeing the `karpathy-guidelines` row in `--dump-config` only proves the bundle was mounted, not that the section registered — the prompt text is the check that matters.
 
 Uninstall removes the dependency and the bundle row, and with it the section:
 
 ```powershell
-& 'D:\dsh-d\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop remove @better-than-coca/dsh-karpathy-guidelines
+& '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop remove @better-than-coca/dsh-karpathy-guidelines
 ```
+
+This package is not published to npm. The `github:` form above is the supported install path.
 
 ## Configuration
 
@@ -85,16 +112,16 @@ There is no tool, no event listener, no session state, and no network access.
 - **No per-turn relevance gate** — the section is in every request, including sessions with no code in them. `promptMode: 'off'` is manual; a hook plugin keyed on the turn's intent could gate it automatically, and that is deliberately not built yet.
 - **No mandatory concluding procedure** — the four principles shape how work is done, not how it is reported. The `full` text keeps the upstream `step -> verify` plan template; there is no enforced response header such as `Assumption / Changed / Verified`, because the harness already owns its own response conventions.
 - **Provenance** — the `full` body is the upstream SKILL.md text, redistributed under the MIT declaration in that repository's frontmatter. See [`NOTICE`](NOTICE).
-- **Unverified on the live GUI session** — the packaged artifact was mounted and composed through the loader in an isolated profile, and its section contract is unit-tested, but the plan called for a real GUI restart to see it in a live request. Until that restart, treat "renders in a live session" as unproven.
+- **Live-session rendering** — observed in a real desktop-app request on 2026-10-15 (DSH desktop app, `desktop` profile, `promptMode: compact`): the composed section reached the model's system prompt verbatim. The packaged artifact is also mounted and composed through the loader in an isolated profile, and the section contract is unit-tested. What tests do not cover is a third-party host whose section order differs from the one this was developed against.
 
 ## Tests
 
 ```powershell
-cd E:\dsh\dsh-karpathy-guidelines
+cd <checkout>
 node --test 'test/*.test.mjs'
 ```
 
-Sixteen cases cover configuration defaults and rejection paths, the section registration contract (one section, derived order, disposer on unload, fallback when the registry is absent), and the composed text for every mode.
+Seventeen cases cover configuration defaults and rejection paths, the section registration contract (one section, derived order, disposer on unload, fallback when the registry is absent), and the composed text for every mode.
 
 ## License
 
