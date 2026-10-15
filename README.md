@@ -48,7 +48,7 @@ Or install straight from GitHub — no npm account required, and the right choic
 Replace `desktop` with the profile you are installing into. The `github:` form tracks the default branch, so append a release tag to pin a known revision instead:
 
 ```powershell
-& '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add github:better-than-coca/dsh-karpathy-guidelines#v0.1.2
+& '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add github:better-than-coca/dsh-karpathy-guidelines#v0.1.3
 ```
 
 Restart the DSH application afterwards; the loader mounts a new bundle at startup.
@@ -128,6 +128,19 @@ node --test 'test/*.test.mjs'
 ```
 
 Seventeen cases cover configuration defaults and rejection paths, the section registration contract (one section, derived order, disposer on unload, fallback when the registry is absent), and the composed text for every mode.
+
+## Releasing
+
+Releases are tag-driven. Bump `version` in `package.json`, commit, then push a tag carrying the same number:
+
+```bash
+git tag v0.1.3
+git push origin v0.1.3
+```
+
+The `Publish Package` workflow checks that the tag matches `package.json`, runs the test suite, and publishes to npm. It authenticates with [OIDC trusted publishing](https://docs.npmjs.com/trusted-publishers), so there is no npm token in this repository and none in CI secrets — npm exchanges the workflow's short-lived identity token for a publish credential scoped to that single run, and generates provenance attestations automatically.
+
+The workflow can also be started by hand from the Actions tab when a tag push needs a re-run.
 
 ## License
 

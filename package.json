@@ -1,6 +1,6 @@
 {
   "name": "@better-than-coca/dsh-karpathy-guidelines",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Karpathy-style coding discipline for DeepSeek Harness, delivered as a native system-prompt section instead of a Codex-style plugin manifest.",
   "keywords": [
     "deepseek-harness",
