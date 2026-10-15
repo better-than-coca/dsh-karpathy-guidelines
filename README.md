@@ -50,7 +50,7 @@
 把 `desktop` 换成你要装进去的那个 profile。`github:` 形式跟的是默认分支，所以想锁到一个确定的版本，就在后面缀上 release tag：
 
 ```powershell
-& '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add github:better-than-coca/dsh-karpathy-guidelines#v0.1.3
+& '<DSH install>\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add github:better-than-coca/dsh-karpathy-guidelines#v0.1.4
 ```
 
 装完重启 DSH 应用；新的 bundle 在启动时挂载。
@@ -136,8 +136,8 @@ node --test 'test/*.test.mjs'
 发布由 tag 驱动。改 `package.json` 里的 `version`、提交，然后推一个同号的 tag：
 
 ```bash
-git tag v0.1.3
-git push origin v0.1.3
+git tag v0.1.4
+git push origin v0.1.4
 ```
 
 `Publish Package` workflow 会先核对 tag 与 `package.json` 是否一致，跑测试套件，然后发布到 npm。它用 [OIDC trusted publishing](https://docs.npmjs.com/trusted-publishers) 认证，所以这个仓库里没有 npm token，CI secrets 里也没有——npm 拿 workflow 的短期身份令牌换一份只对那一次运行有效的发布凭据，并自动生成 provenance 证明。
